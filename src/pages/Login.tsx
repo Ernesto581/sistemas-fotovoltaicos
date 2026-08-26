@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 
 export default function Login() {
-  const { signIn } = useAuth()
+  const { signIn, configError } = useAuth()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -28,6 +28,11 @@ export default function Login() {
           <h1 className="mt-1 text-lg font-bold text-slate-800">Sistemas Fotovoltaicos</h1>
           <p className="text-xs text-slate-500">Inicia sesión para continuar</p>
         </div>
+        {configError && (
+          <div className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">
+            {configError}
+          </div>
+        )}
         {error && (
           <div className="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>
         )}

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 
 export default function Register() {
-  const { signUp } = useAuth()
+  const { signUp, configError } = useAuth()
   const navigate = useNavigate()
   const [nombre, setNombre] = useState('')
   const [email, setEmail] = useState('')
@@ -29,6 +29,11 @@ export default function Register() {
           <h1 className="mt-1 text-lg font-bold text-slate-800">Crear cuenta</h1>
           <p className="text-xs text-slate-500">Solo se permiten 2 usuarios</p>
         </div>
+        {configError && (
+          <div className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">
+            {configError}
+          </div>
+        )}
         {error && (
           <div className="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>
         )}

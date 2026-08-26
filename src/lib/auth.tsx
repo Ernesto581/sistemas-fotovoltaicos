@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
-import { supabase } from './supabase'
+import { supabase, isSupabaseConfigured } from './supabase'
 import { seedDefaultSocios, syncNow, isOnline } from './sync'
 
 interface AuthState {
@@ -8,6 +8,7 @@ interface AuthState {
   user: User | null
   loading: boolean
   online: boolean
+  configError: string | null
   signIn: (email: string, password: string) => Promise<{ error?: string }>
   signUp: (email: string, password: string, nombre: string) => Promise<{ error?: string }>
   signOut: () => Promise<void>
@@ -19,9 +20,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
   const [online, setOnline] = useState(navigator.onLine)
+  const configError = isSupabaseConfigured
+    ? null
+    : 'Falta configurar VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en el archivo .env'
 
   useEffect(() => {
     let mounted = true
+    if (!isSupabaseConfigured) {
+      setLoading(false)
+      return
+    }
     supabase.auth.getSession().then(({ data }) => {
       if (mounted) {
         setSession(data.session)
@@ -57,6 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [online, session])
 
   const signIn = async (email: string, password: string) => {
+    if (!isSupabaseConfigured) return { error: 'Falta configurar Supabase en el archivo .env' }
     if (!(await isOnline())) return { error: 'Sin conexión. Conéctate a internet para iniciar sesión.' }
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) return { error: traduccion(error.message) }
@@ -64,6 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signUp = async (email: string, password: string, nombre: string) => {
+    if (!isSupabaseConfigured) return { error: 'Falta configurar Supabase en el archivo .env' }
     if (!(await isOnline())) return { error: 'Sin conexión. Conéctate a internet para registrarte.' }
     const { error } = await supabase.auth.signUp({
       email,
@@ -80,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ session, user: session?.user ?? null, loading, online, signIn, signUp, signOut }}
+      value={{ session, user: session?.user ?? null, loading, online, configError, signIn, signUp, signOut }}
     >
       {children}
     </AuthContext.Provider>

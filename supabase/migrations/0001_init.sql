@@ -29,6 +29,7 @@ create table if not exists public.materiales (
   unidad text,
   precio_mn numeric not null default 0,
   precio_usd numeric not null default 0,
+  stock numeric not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   deleted boolean not null default false

@@ -2,7 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useState } from 'react'
 import { db } from '../lib/db'
 import { createRow, updateRow, softDeleteRow } from '../lib/sync'
-import { fmtMoney } from '../lib/format'
+import { fmtMoney, fmtNum } from '../lib/format'
 import { Card, CardHeader, Empty } from '../components/ui'
 
 interface Form {
@@ -11,12 +11,13 @@ interface Form {
   unidad: string
   precio_mn: string
   precio_usd: string
+  stock: string
 }
 
-const empty: Form = { nombre: '', unidad: '', precio_mn: '', precio_usd: '' }
+const empty: Form = { nombre: '', unidad: '', precio_mn: '', precio_usd: '', stock: '' }
 
 export default function Materiales() {
-  const materiales = useLiveQuery(() => db.materiales.filter(r => !r.deleted).toArray(), [])
+  const materiales = useLiveQuery(() => db.materiales.filter((r) => !r.deleted).toArray(), [])
   const [form, setForm] = useState<Form>(empty)
   const [busqueda, setBusqueda] = useState('')
 
@@ -29,6 +30,7 @@ export default function Materiales() {
       unidad: form.unidad.trim(),
       precio_mn: Number(form.precio_mn) || 0,
       precio_usd: Number(form.precio_usd) || 0,
+      stock: Number(form.stock) || 0,
     }
     if (!data.nombre) return
     if (form.id) {
@@ -46,6 +48,7 @@ export default function Materiales() {
       unidad: m.unidad ?? '',
       precio_mn: String(m.precio_mn || ''),
       precio_usd: String(m.precio_usd || ''),
+      stock: String(m.stock || ''),
     })
   }
 
@@ -56,14 +59,14 @@ export default function Materiales() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-xl font-bold text-slate-800">Catálogo de materiales</h1>
+        <h1 className="text-xl font-bold text-slate-800">Almacén de materiales</h1>
         <p className="text-sm text-slate-500">
-          {materiales.length} materiales · precios en MN y USD independientes
+          {materiales.length} materiales · el stock baja automáticamente al usarlos en un proyecto
         </p>
       </div>
 
       <Card className="p-4">
-        <form onSubmit={guardar} className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+        <form onSubmit={guardar} className="grid grid-cols-2 gap-3 sm:grid-cols-6">
           <input
             className="input sm:col-span-2"
             placeholder="Nombre del material"
@@ -92,7 +95,15 @@ export default function Materiales() {
             value={form.precio_usd}
             onChange={(e) => setForm({ ...form, precio_usd: e.target.value })}
           />
-          <div className="col-span-2 flex gap-2 sm:col-span-5">
+          <input
+            className="input"
+            placeholder="Stock inicial"
+            type="number"
+            step="any"
+            value={form.stock}
+            onChange={(e) => setForm({ ...form, stock: e.target.value })}
+          />
+          <div className="col-span-2 flex gap-2 sm:col-span-6">
             <button className="btn-primary" type="submit">
               {form.id ? 'Guardar cambios' : 'Agregar material'}
             </button>
@@ -128,6 +139,7 @@ export default function Materiales() {
                   <th className="px-4 py-2">Unidad</th>
                   <th className="px-4 py-2 text-right">Precio MN</th>
                   <th className="px-4 py-2 text-right">Precio USD</th>
+                  <th className="px-4 py-2 text-right">Stock</th>
                   <th className="px-4 py-2"></th>
                 </tr>
               </thead>
@@ -138,6 +150,15 @@ export default function Materiales() {
                     <td className="px-4 py-2 text-slate-500">{m.unidad || '—'}</td>
                     <td className="px-4 py-2 text-right">{fmtMoney(m.precio_mn, 'MN')}</td>
                     <td className="px-4 py-2 text-right">{fmtMoney(m.precio_usd, 'USD')}</td>
+                    <td className="px-4 py-2 text-right">
+                      <span
+                        className={`font-semibold ${
+                          (m.stock || 0) > 0 ? 'text-emerald-600' : 'text-red-500'
+                        }`}
+                      >
+                        {fmtNum(m.stock)}
+                      </span>
+                    </td>
                     <td className="px-4 py-2 text-right">
                       <button className="text-brand-600 hover:underline" onClick={() => editar(m)}>
                         Editar

@@ -24,6 +24,7 @@ export interface Material {
   unidad?: string
   precio_mn: number
   precio_usd: number
+  stock: number
   created_at: string
   updated_at: string
   deleted: boolean

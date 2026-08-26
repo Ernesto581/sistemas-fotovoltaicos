@@ -3,10 +3,12 @@ import { useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { db } from '../lib/db'
 import { createRow, updateRow, softDeleteRow } from '../lib/sync'
+import { updateMaterialLine, deleteMaterialLine } from '../lib/inventory'
 import { computeTotales } from '../lib/calc'
 import { fmtMoney, fmtNum, nowIso } from '../lib/format'
 import { Card, CardHeader, Empty } from '../components/ui'
 import { ProjectForm } from '../components/ProjectForm'
+import { MaterialLineForm } from '../components/MaterialLineForm'
 import { generarCotizacion } from '../lib/cotizacion'
 import type { ProyectoMaterial } from '../types'
 
@@ -26,6 +28,7 @@ export default function ProyectoDetalle() {
 
   const [generando, setGenerando] = useState(false)
   const [editando, setEditando] = useState(false)
+  const [agregandoMaterial, setAgregandoMaterial] = useState(false)
 
   const cliente = useMemo(
     () => clientes?.find((c) => c.id === proyecto?.cliente_id),
@@ -114,18 +117,26 @@ export default function ProyectoDetalle() {
         <CardHeader
           title="Materiales"
           action={
-            <button
-              className="btn-secondary"
-              onClick={() => createRow('proyecto_materiales', { proyecto_id: id!, descripcion: '', cantidad: 0, precio_mn: 0, precio_usd: 0 })}
-            >
+            <button className="btn-secondary" onClick={() => setAgregandoMaterial((s) => !s)}>
               + Material
             </button>
           }
         />
+        {agregandoMaterial && (
+          <div className="border-b border-slate-100 px-4 py-3">
+            <MaterialLineForm
+              proyectoId={id!}
+              catalogo={catalogo ?? []}
+              socios={socios ?? []}
+              onDone={() => setAgregandoMaterial(false)}
+              onCancel={() => setAgregandoMaterial(false)}
+            />
+          </div>
+        )}
         {!materiales || materiales.length === 0 ? (
           <Empty text="Sin materiales. Agrega el primero." />
         ) : (
-          <TablaMateriales items={materiales} catalogo={catalogo ?? []} socios={socios ?? []} />
+          <TablaMateriales items={materiales} socios={socios ?? []} />
         )}
       </Card>
 
@@ -199,11 +210,9 @@ export default function ProyectoDetalle() {
 
 function TablaMateriales({
   items,
-  catalogo,
   socios,
 }: {
   items: ProyectoMaterial[]
-  catalogo: { id: string; nombre: string; precio_mn: number; precio_usd: number }[]
   socios: { id: string; nombre: string }[]
 }) {
   return (
@@ -222,87 +231,85 @@ function TablaMateriales({
           </tr>
         </thead>
         <tbody>
-          {items.map((m) => {
-            const elegir = (nombre: string) => {
-              const mat = catalogo.find((c) => c.nombre.toLowerCase() === nombre.toLowerCase())
-              if (mat) {
-                updateRow('proyecto_materiales', {
-                  id: m.id,
-                  descripcion: mat.nombre,
-                  material_id: mat.id,
-                  precio_mn: mat.precio_mn,
-                  precio_usd: mat.precio_usd,
-                } as never)
-              } else {
-                updateRow('proyecto_materiales', { id: m.id, descripcion: nombre } as never)
-              }
-            }
-            return (
-              <tr key={m.id} className="border-b border-slate-50">
-                <td className="px-4 py-1">
-                  <input
-                    className="input border-0 px-1 py-1"
-                    list={`cat-${m.id}`}
-                    value={m.descripcion}
-                    onChange={(e) => elegir(e.target.value)}
-                  />
-                  <datalist id={`cat-${m.id}`}>
-                    {catalogo.map((c) => (
-                      <option key={c.id} value={c.nombre} />
-                    ))}
-                  </datalist>
-                </td>
-                <td className="px-4 py-1">
-                  <input
-                    className="input border-0 px-1 py-1 text-right"
-                    type="number"
-                    step="any"
-                    defaultValue={m.cantidad || ''}
-                    onBlur={(e) => updateRow('proyecto_materiales', { id: m.id, cantidad: Number(e.target.value) || 0 } as never)}
-                  />
-                </td>
-                <td className="px-4 py-1">
-                  <input
-                    className="input border-0 px-1 py-1 text-right"
-                    type="number"
-                    step="any"
-                    defaultValue={m.precio_mn || ''}
-                    onBlur={(e) => updateRow('proyecto_materiales', { id: m.id, precio_mn: Number(e.target.value) || 0 } as never)}
-                  />
-                </td>
-                <td className="px-4 py-1">
-                  <input
-                    className="input border-0 px-1 py-1 text-right"
-                    type="number"
-                    step="any"
-                    defaultValue={m.precio_usd || ''}
-                    onBlur={(e) => updateRow('proyecto_materiales', { id: m.id, precio_usd: Number(e.target.value) || 0 } as never)}
-                  />
-                </td>
-                <td className="px-4 py-1">
-                  <select
-                    className="input border-0 px-1 py-1"
-                    value={m.socio_comprador ?? ''}
-                    onChange={(e) => updateRow('proyecto_materiales', { id: m.id, socio_comprador: e.target.value } as never)}
-                  >
-                    <option value="">—</option>
-                    {socios.map((s) => (
-                      <option key={s.id} value={s.nombre}>
-                        {s.nombre}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td className="px-4 py-1 text-right">{fmtMoney((m.cantidad || 0) * (m.precio_mn || 0), 'MN')}</td>
-                <td className="px-4 py-1 text-right">{fmtMoney((m.cantidad || 0) * (m.precio_usd || 0), 'USD')}</td>
-                <td className="px-4 py-1 text-right">
-                  <button className="text-red-500 hover:underline" onClick={() => softDeleteRow('proyecto_materiales', m.id)}>
-                    ✕
-                  </button>
-                </td>
-              </tr>
-            )
-          })}
+          {items.map((m) => (
+            <tr key={m.id} className="border-b border-slate-50">
+              <td className="px-4 py-1">
+                <span className="font-medium">{m.descripcion}</span>{' '}
+                {m.material_id ? (
+                  <span className="rounded bg-brand-50 px-1.5 py-0.5 text-xs text-brand-600">
+                    almacén
+                  </span>
+                ) : (
+                  <span className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-500">
+                    proyecto
+                  </span>
+                )}
+              </td>
+              <td className="px-4 py-1">
+                <input
+                  className="input border-0 px-1 py-1 text-right"
+                  type="number"
+                  step="any"
+                  defaultValue={m.cantidad || ''}
+                  onBlur={(e) =>
+                    updateMaterialLine(m.id, { cantidad: Number(e.target.value) || 0 })
+                  }
+                />
+              </td>
+              <td className="px-4 py-1">
+                <input
+                  className="input border-0 px-1 py-1 text-right"
+                  type="number"
+                  step="any"
+                  defaultValue={m.precio_mn || ''}
+                  onBlur={(e) =>
+                    updateMaterialLine(m.id, { precio_mn: Number(e.target.value) || 0 })
+                  }
+                />
+              </td>
+              <td className="px-4 py-1">
+                <input
+                  className="input border-0 px-1 py-1 text-right"
+                  type="number"
+                  step="any"
+                  defaultValue={m.precio_usd || ''}
+                  onBlur={(e) =>
+                    updateMaterialLine(m.id, { precio_usd: Number(e.target.value) || 0 })
+                  }
+                />
+              </td>
+              <td className="px-4 py-1">
+                <select
+                  className="input border-0 px-1 py-1"
+                  value={m.socio_comprador ?? ''}
+                  onChange={(e) => updateMaterialLine(m.id, { socio_comprador: e.target.value })}
+                >
+                  <option value="">—</option>
+                  {socios.map((s) => (
+                    <option key={s.id} value={s.nombre}>
+                      {s.nombre}
+                    </option>
+                  ))}
+                </select>
+              </td>
+              <td className="px-4 py-1 text-right">
+                {fmtMoney((m.cantidad || 0) * (m.precio_mn || 0), 'MN')}
+              </td>
+              <td className="px-4 py-1 text-right">
+                {fmtMoney((m.cantidad || 0) * (m.precio_usd || 0), 'USD')}
+              </td>
+              <td className="px-4 py-1 text-right">
+                <button
+                  className="text-red-500 hover:underline"
+                  onClick={() => {
+                    if (confirm('¿Eliminar este material del proyecto?')) deleteMaterialLine(m.id)
+                  }}
+                >
+                  ✕
+                </button>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

@@ -46,7 +46,7 @@ export default function ProyectoDetalle() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-start justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <Link to="/proyectos" className="text-sm text-brand-600 hover:underline">
             ← Proyectos

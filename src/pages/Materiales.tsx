@@ -66,7 +66,7 @@ export default function Materiales() {
       </div>
 
       <Card className="p-4">
-        <form onSubmit={guardar} className="grid grid-cols-2 gap-3 sm:grid-cols-6">
+        <form onSubmit={guardar} className="grid grid-cols-1 gap-3 sm:grid-cols-6">
           <input
             className="input sm:col-span-2"
             placeholder="Nombre del material"
@@ -103,7 +103,7 @@ export default function Materiales() {
             value={form.stock}
             onChange={(e) => setForm({ ...form, stock: e.target.value })}
           />
-          <div className="col-span-2 flex gap-2 sm:col-span-6">
+          <div className="flex gap-2 sm:col-span-6">
             <button className="btn-primary" type="submit">
               {form.id ? 'Guardar cambios' : 'Agregar material'}
             </button>

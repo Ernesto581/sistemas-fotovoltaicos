@@ -56,7 +56,7 @@ export function MaterialLineForm({ proyectoId, catalogo, socios, onDone, onCance
 
   return (
     <form onSubmit={guardar} className="rounded-lg border border-brand-100 bg-brand-50/40 p-4">
-      <div className="mb-3 flex gap-2">
+      <div className="mb-3 flex flex-wrap gap-2">
         <button
           type="button"
           className={`btn ${modo === 'almacen' ? 'btn-primary' : 'btn-secondary'}`}

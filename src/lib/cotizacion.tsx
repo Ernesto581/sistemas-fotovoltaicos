@@ -59,13 +59,11 @@ export function CotizacionDoc({
         <View style={styles.section}>
           <View style={styles.row}>
             <Text style={styles.label}>Potencia</Text>
-            <Text style={styles.value}>{proyecto.watts} W</Text>
+            <Text style={styles.value}>{proyecto.watts} kW</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.label}>Mano de obra</Text>
-            <Text style={styles.value}>
-              ${proyecto.tarifa_mo} / {proyecto.tarifa_tipo}
-            </Text>
+            <Text style={styles.value}>${proyecto.tarifa_mo} / kW</Text>
           </View>
         </View>
 

@@ -6,6 +6,7 @@ import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import Materiales from './pages/Materiales'
 import Proyectos from './pages/Proyectos'
+import ProyectoNuevo from './pages/ProyectoNuevo'
 import ProyectoDetalle from './pages/ProyectoDetalle'
 import Cobros from './pages/Cobros'
 import Reportes from './pages/Reportes'
@@ -39,6 +40,7 @@ export default function App() {
         <Route index element={<Dashboard />} />
         <Route path="materiales" element={<Materiales />} />
         <Route path="proyectos" element={<Proyectos />} />
+        <Route path="proyectos/nuevo" element={<ProyectoNuevo />} />
         <Route path="proyectos/:id" element={<ProyectoDetalle />} />
         <Route path="cobros" element={<Cobros />} />
         <Route path="reportes" element={<Reportes />} />

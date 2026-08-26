@@ -6,6 +6,7 @@ import { createRow, updateRow, softDeleteRow } from '../lib/sync'
 import { computeTotales } from '../lib/calc'
 import { fmtMoney, fmtNum, nowIso } from '../lib/format'
 import { Card, CardHeader, Empty } from '../components/ui'
+import { ProjectForm } from '../components/ProjectForm'
 import { generarCotizacion } from '../lib/cotizacion'
 import type { ProyectoMaterial } from '../types'
 
@@ -24,6 +25,7 @@ export default function ProyectoDetalle() {
   const gastos = useLiveQuery(() => db.gastos.where('proyecto_id').equals(id!).toArray(), [id])
 
   const [generando, setGenerando] = useState(false)
+  const [editando, setEditando] = useState(false)
 
   const cliente = useMemo(
     () => clientes?.find((c) => c.id === proyecto?.cliente_id),
@@ -50,25 +52,40 @@ export default function ProyectoDetalle() {
             {proyecto.codigo} · {cliente?.nombre || proyecto.nombre}
           </h1>
           <p className="text-sm text-slate-500">
-            {fmtNum(proyecto.watts)} W · MO ${fmtNum(proyecto.tarifa_mo)}/{proyecto.tarifa_tipo} ·{' '}
-            {proyecto.estado}
+            {fmtNum(proyecto.watts)} kW · MO ${fmtNum(proyecto.tarifa_mo)}/kW · {proyecto.estado}
           </p>
         </div>
-        <button
-          className="btn-primary"
-          disabled={generando}
-          onClick={async () => {
-            setGenerando(true)
-            try {
-              await generarCotizacion({ proyecto, cliente: cliente?.nombre ?? proyecto.nombre, materiales: materiales ?? [], manoObra: manoObra ?? [], totals })
-            } finally {
-              setGenerando(false)
-            }
-          }}
-        >
-          {generando ? 'Generando…' : 'Cotización PDF'}
-        </button>
+        <div className="flex gap-2">
+          <button className="btn-secondary" onClick={() => setEditando((s) => !s)}>
+            Editar
+          </button>
+          <button
+            className="btn-primary"
+            disabled={generando}
+            onClick={async () => {
+              setGenerando(true)
+              try {
+                await generarCotizacion({ proyecto, cliente: cliente?.nombre ?? proyecto.nombre, materiales: materiales ?? [], manoObra: manoObra ?? [], totals })
+              } finally {
+                setGenerando(false)
+              }
+            }}
+          >
+            {generando ? 'Generando…' : 'Cotización PDF'}
+          </button>
+        </div>
       </div>
+
+      {editando && (
+        <Card className="p-5">
+          <ProjectForm
+            initial={proyecto}
+            initialClienteNombre={cliente?.nombre}
+            onDone={() => setEditando(false)}
+            onCancel={() => setEditando(false)}
+          />
+        </Card>
+      )}
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Card className="p-4">

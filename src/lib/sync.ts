@@ -97,7 +97,7 @@ export async function syncNow(): Promise<void> {
 }
 
 export async function seedDefaultSocios(): Promise<void> {
-  for (const nombre of ['Raulin', 'Yo']) {
+  for (const nombre of ['Raulin', 'Avilio']) {
     const existe = await db.socios.where('nombre').equals(nombre).count()
     if (existe === 0) await createRow('socios', { nombre })
   }

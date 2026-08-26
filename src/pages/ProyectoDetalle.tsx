@@ -14,7 +14,7 @@ export default function ProyectoDetalle() {
   const proyecto = useLiveQuery(() => db.proyectos.get(id!), [id])
   const clientes = useLiveQuery(() => db.clientes.toArray(), [])
   const socios = useLiveQuery(() => db.socios.toArray(), [])
-  const catalogo = useLiveQuery(() => db.materiales.where('deleted').equals(0).toArray(), [])
+  const catalogo = useLiveQuery(() => db.materiales.filter(r => !r.deleted).toArray(), [])
   const materiales = useLiveQuery(
     () => db.proyecto_materiales.where('proyecto_id').equals(id!).toArray(),
     [id],

@@ -8,8 +8,8 @@ import { fmtNum } from '../lib/format'
 import { Card, CardHeader, Empty } from '../components/ui'
 
 export default function Proyectos() {
-  const proyectos = useLiveQuery(() => db.proyectos.where('deleted').equals(0).toArray(), [])
-  const clientes = useLiveQuery(() => db.clientes.where('deleted').equals(0).toArray(), [])
+  const proyectos = useLiveQuery(() => db.proyectos.filter(r => !r.deleted).toArray(), [])
+  const clientes = useLiveQuery(() => db.clientes.filter(r => !r.deleted).toArray(), [])
   const [showForm, setShowForm] = useState(false)
   const [codigo, setCodigo] = useState('')
   const [cliente, setCliente] = useState('')

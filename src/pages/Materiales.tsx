@@ -16,7 +16,7 @@ interface Form {
 const empty: Form = { nombre: '', unidad: '', precio_mn: '', precio_usd: '' }
 
 export default function Materiales() {
-  const materiales = useLiveQuery(() => db.materiales.where('deleted').equals(0).toArray(), [])
+  const materiales = useLiveQuery(() => db.materiales.filter(r => !r.deleted).toArray(), [])
   const [form, setForm] = useState<Form>(empty)
   const [busqueda, setBusqueda] = useState('')
 

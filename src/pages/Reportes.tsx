@@ -5,8 +5,8 @@ import { Card, CardHeader, Empty } from '../components/ui'
 
 export default function Reportes() {
   const socios = useLiveQuery(() => db.socios.toArray(), [])
-  const materiales = useLiveQuery(() => db.proyecto_materiales.where('deleted').equals(0).toArray(), [])
-  const gastos = useLiveQuery(() => db.gastos.where('deleted').equals(0).toArray(), [])
+  const materiales = useLiveQuery(() => db.proyecto_materiales.filter(r => !r.deleted).toArray(), [])
+  const gastos = useLiveQuery(() => db.gastos.filter(r => !r.deleted).toArray(), [])
 
   if (!socios || !materiales || !gastos) return <div className="text-slate-400">Cargando…</div>
 

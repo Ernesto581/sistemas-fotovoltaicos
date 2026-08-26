@@ -50,6 +50,18 @@ export class AppDB extends Dexie {
       gastos: 'id, proyecto_id, updated_at, deleted',
       outbox: '++id, table, row_id',
     })
+    this.version(3).stores({
+      socios: 'id, nombre, updated_at',
+      clientes: 'id, nombre, updated_at',
+      materiales: 'id, nombre, updated_at',
+      material_alias: 'id, material_id, alias, updated_at',
+      proyectos: 'id, codigo, cliente_id, updated_at',
+      proyecto_materiales: 'id, proyecto_id, material_id, updated_at',
+      mano_obra: 'id, proyecto_id, updated_at',
+      pagos: 'id, proyecto_id, updated_at',
+      gastos: 'id, proyecto_id, updated_at',
+      outbox: '++id, table, row_id',
+    })
   }
 }
 

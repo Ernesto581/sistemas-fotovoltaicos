@@ -6,14 +6,14 @@ import { fmtMoney, fmtNum } from '../lib/format'
 import { Stat, Card, CardHeader, Empty } from '../components/ui'
 
 export default function Dashboard() {
-  const proyectos = useLiveQuery(() => db.proyectos.where('deleted').equals(0).toArray(), [])
+  const proyectos = useLiveQuery(() => db.proyectos.filter(r => !r.deleted).toArray(), [])
   const materiales = useLiveQuery(
-    () => db.proyecto_materiales.where('deleted').equals(0).toArray(),
+    () => db.proyecto_materiales.filter(r => !r.deleted).toArray(),
     [],
   )
-  const manoObra = useLiveQuery(() => db.mano_obra.where('deleted').equals(0).toArray(), [])
-  const pagos = useLiveQuery(() => db.pagos.where('deleted').equals(0).toArray(), [])
-  const gastos = useLiveQuery(() => db.gastos.where('deleted').equals(0).toArray(), [])
+  const manoObra = useLiveQuery(() => db.mano_obra.filter(r => !r.deleted).toArray(), [])
+  const pagos = useLiveQuery(() => db.pagos.filter(r => !r.deleted).toArray(), [])
+  const gastos = useLiveQuery(() => db.gastos.filter(r => !r.deleted).toArray(), [])
   const clientes = useLiveQuery(() => db.clientes.toArray(), [])
 
   if (!proyectos || !materiales || !manoObra || !pagos || !gastos) {

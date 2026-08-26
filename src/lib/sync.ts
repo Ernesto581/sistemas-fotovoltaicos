@@ -42,16 +42,6 @@ export async function softDeleteRow(table: TableName, id: string): Promise<void>
   await localWrite(table, { ...existing, deleted: true })
 }
 
-const LAST_SYNC_KEY = 'sf_last_sync'
-
-function getLastSync(): string {
-  return localStorage.getItem(LAST_SYNC_KEY) || new Date(0).toISOString()
-}
-
-function setLastSync(iso: string) {
-  localStorage.setItem(LAST_SYNC_KEY, iso)
-}
-
 export async function isOnline(): Promise<boolean> {
   if (!navigator.onLine) return false
   try {
@@ -81,14 +71,10 @@ async function pushOutbox(): Promise<void> {
 }
 
 async function pullChanges(): Promise<void> {
-  const lastSync = getLastSync()
-  const fetchedAt = nowIso()
   for (const table of TABLE_NAMES) {
-    const { data, error } = await supabase
-      .from(table)
-      .select('*')
-      .gt('updated_at', lastSync)
-      .order('updated_at', { ascending: true })
+    const { data, error } = await supabase.from(table).select('*').order('updated_at', {
+      ascending: true,
+    })
     if (error) {
       console.warn('pull falló para', table, error)
       continue
@@ -102,7 +88,6 @@ async function pullChanges(): Promise<void> {
       }
     }
   }
-  setLastSync(fetchedAt)
 }
 
 export async function syncNow(): Promise<void> {
@@ -112,10 +97,8 @@ export async function syncNow(): Promise<void> {
 }
 
 export async function seedDefaultSocios(): Promise<void> {
-  const count = await db.socios.count()
-  if (count === 0) {
-    for (const nombre of ['Raulin', 'Yo']) {
-      await createRow('socios', { nombre })
-    }
+  for (const nombre of ['Raulin', 'Yo']) {
+    const existe = await db.socios.where('nombre').equals(nombre).count()
+    if (existe === 0) await createRow('socios', { nombre })
   }
 }

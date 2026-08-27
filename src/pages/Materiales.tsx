@@ -33,11 +33,8 @@ export default function Materiales() {
       stock: Number(form.stock) || 0,
     }
     if (!data.nombre) return
-    if (form.id) {
-      await updateRow('materiales', { id: form.id, ...data })
-    } else {
-      await createRow('materiales', data)
-    }
+    if (form.id) await updateRow('materiales', { id: form.id, ...data })
+    else await createRow('materiales', data)
     setForm(empty)
   }
 
@@ -50,11 +47,14 @@ export default function Materiales() {
       precio_usd: String(m.precio_usd || ''),
       stock: String(m.stock || ''),
     })
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const filtrados = materiales
     .filter((m) => m.nombre.toLowerCase().includes(busqueda.toLowerCase()))
     .sort((a, b) => a.nombre.localeCompare(b.nombre))
+
+  const stockColor = (s: number) => (s > 0 ? 'text-emerald-600' : 'text-red-500')
 
   return (
     <div className="space-y-4">
@@ -116,69 +116,106 @@ export default function Materiales() {
         </form>
       </Card>
 
-      <Card>
-        <CardHeader
-          title="Materiales"
-          action={
-            <input
-              className="input w-48"
-              placeholder="Buscar…"
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-            />
-          }
+      <div>
+        <input
+          className="input"
+          placeholder="Buscar material…"
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
         />
-        {filtrados.length === 0 ? (
+      </div>
+
+      {filtrados.length === 0 ? (
+        <Card>
           <Empty text="Sin materiales. Agrega el primero arriba." />
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-100 text-left text-xs text-slate-500">
-                  <th className="px-4 py-2">Material</th>
-                  <th className="px-4 py-2">Unidad</th>
-                  <th className="px-4 py-2 text-right">Precio MN</th>
-                  <th className="px-4 py-2 text-right">Precio USD</th>
-                  <th className="px-4 py-2 text-right">Stock</th>
-                  <th className="px-4 py-2"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtrados.map((m) => (
-                  <tr key={m.id} className="border-b border-slate-50 hover:bg-slate-50">
-                    <td className="px-4 py-2 font-medium">{m.nombre}</td>
-                    <td className="px-4 py-2 text-slate-500">{m.unidad || '—'}</td>
-                    <td className="px-4 py-2 text-right">{fmtMoney(m.precio_mn, 'MN')}</td>
-                    <td className="px-4 py-2 text-right">{fmtMoney(m.precio_usd, 'USD')}</td>
-                    <td className="px-4 py-2 text-right">
-                      <span
-                        className={`font-semibold ${
-                          (m.stock || 0) > 0 ? 'text-emerald-600' : 'text-red-500'
-                        }`}
-                      >
-                        {fmtNum(m.stock)}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2 text-right">
-                      <button className="text-brand-600 hover:underline" onClick={() => editar(m)}>
-                        Editar
-                      </button>
-                      <button
-                        className="ml-3 text-red-500 hover:underline"
-                        onClick={() => {
-                          if (confirm(`¿Eliminar "${m.nombre}"?`)) softDeleteRow('materiales', m.id)
-                        }}
-                      >
-                        Borrar
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        </Card>
+      ) : (
+        <>
+          {/* Mobile: cards */}
+          <div className="space-y-3 sm:hidden">
+            {filtrados.map((m) => (
+              <Card key={m.id} className="p-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="font-medium text-slate-800">{m.nombre}</div>
+                    <div className="text-xs text-slate-400">{m.unidad || '—'}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className={`text-lg font-bold ${stockColor(m.stock || 0)}`}>
+                      {fmtNum(m.stock)}
+                    </div>
+                    <div className="text-xs text-slate-400">stock</div>
+                  </div>
+                </div>
+                <div className="mt-2 flex items-center justify-between text-sm">
+                  <div className="space-x-3 text-slate-600">
+                    <span>{fmtMoney(m.precio_mn, 'MN')}</span>
+                    <span>{fmtMoney(m.precio_usd, 'USD')}</span>
+                  </div>
+                  <div className="space-x-3">
+                    <button className="text-brand-600" onClick={() => editar(m)}>
+                      Editar
+                    </button>
+                    <button
+                      className="text-red-500"
+                      onClick={() => {
+                        if (confirm(`¿Eliminar "${m.nombre}"?`)) softDeleteRow('materiales', m.id)
+                      }}
+                    >
+                      Borrar
+                    </button>
+                  </div>
+                </div>
+              </Card>
+            ))}
           </div>
-        )}
-      </Card>
+
+          {/* Desktop: table */}
+          <Card className="hidden sm:block">
+            <CardHeader title="Materiales" />
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-100 text-left text-xs text-slate-500">
+                    <th className="px-4 py-2">Material</th>
+                    <th className="px-4 py-2">Unidad</th>
+                    <th className="px-4 py-2 text-right">Precio MN</th>
+                    <th className="px-4 py-2 text-right">Precio USD</th>
+                    <th className="px-4 py-2 text-right">Stock</th>
+                    <th className="px-4 py-2"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtrados.map((m) => (
+                    <tr key={m.id} className="border-b border-slate-50 hover:bg-slate-50">
+                      <td className="px-4 py-2 font-medium">{m.nombre}</td>
+                      <td className="px-4 py-2 text-slate-500">{m.unidad || '—'}</td>
+                      <td className="px-4 py-2 text-right">{fmtMoney(m.precio_mn, 'MN')}</td>
+                      <td className="px-4 py-2 text-right">{fmtMoney(m.precio_usd, 'USD')}</td>
+                      <td className={`px-4 py-2 text-right font-semibold ${stockColor(m.stock || 0)}`}>
+                        {fmtNum(m.stock)}
+                      </td>
+                      <td className="px-4 py-2 text-right">
+                        <button className="text-brand-600 hover:underline" onClick={() => editar(m)}>
+                          Editar
+                        </button>
+                        <button
+                          className="ml-3 text-red-500 hover:underline"
+                          onClick={() => {
+                            if (confirm(`¿Eliminar "${m.nombre}"?`)) softDeleteRow('materiales', m.id)
+                          }}
+                        >
+                          Borrar
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </>
+      )}
     </div>
   )
 }

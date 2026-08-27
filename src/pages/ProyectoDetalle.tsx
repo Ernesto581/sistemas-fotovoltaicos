@@ -208,6 +208,14 @@ export default function ProyectoDetalle() {
   )
 }
 
+function Badge({ tipo }: { tipo: 'almacen' | 'proyecto' }) {
+  return tipo === 'almacen' ? (
+    <span className="rounded bg-brand-50 px-1.5 py-0.5 text-xs text-brand-600">almacén</span>
+  ) : (
+    <span className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-500">proyecto</span>
+  )
+}
+
 function TablaMateriales({
   items,
   socios,
@@ -215,72 +223,41 @@ function TablaMateriales({
   items: ProyectoMaterial[]
   socios: { id: string; nombre: string }[]
 }) {
+  const eliminar = (id: string) => {
+    if (confirm('¿Eliminar este material del proyecto?')) deleteMaterialLine(id)
+  }
+
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-slate-100 text-left text-xs text-slate-500">
-            <th className="px-4 py-2">Material</th>
-            <th className="px-4 py-2 w-16 text-right">Cant</th>
-            <th className="px-4 py-2 w-24 text-right">Precio MN</th>
-            <th className="px-4 py-2 w-24 text-right">Precio USD</th>
-            <th className="px-4 py-2 w-32">Quién paga</th>
-            <th className="px-4 py-2 w-28 text-right">Total MN</th>
-            <th className="px-4 py-2 w-28 text-right">Total USD</th>
-            <th className="px-4 py-2"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((m) => (
-            <tr key={m.id} className="border-b border-slate-50">
-              <td className="px-4 py-1">
-                <span className="font-medium">{m.descripcion}</span>{' '}
-                {m.material_id ? (
-                  <span className="rounded bg-brand-50 px-1.5 py-0.5 text-xs text-brand-600">
-                    almacén
-                  </span>
-                ) : (
-                  <span className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-500">
-                    proyecto
-                  </span>
-                )}
-              </td>
-              <td className="px-4 py-1">
+    <>
+      {/* Mobile: cards */}
+      <div className="space-y-3 p-3 sm:hidden">
+        {items.map((m) => (
+          <div key={m.id} className="rounded-lg border border-slate-200 p-3">
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-slate-800">{m.descripcion}</span>
+                <Badge tipo={m.material_id ? 'almacen' : 'proyecto'} />
+              </div>
+              <button className="text-red-500" onClick={() => eliminar(m.id)}>
+                ✕
+              </button>
+            </div>
+
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              <div>
+                <label className="label">Cantidad</label>
                 <input
-                  className="input border-0 px-1 py-1 text-right"
+                  className="input"
                   type="number"
                   step="any"
                   defaultValue={m.cantidad || ''}
-                  onBlur={(e) =>
-                    updateMaterialLine(m.id, { cantidad: Number(e.target.value) || 0 })
-                  }
+                  onBlur={(e) => updateMaterialLine(m.id, { cantidad: Number(e.target.value) || 0 })}
                 />
-              </td>
-              <td className="px-4 py-1">
-                <input
-                  className="input border-0 px-1 py-1 text-right"
-                  type="number"
-                  step="any"
-                  defaultValue={m.precio_mn || ''}
-                  onBlur={(e) =>
-                    updateMaterialLine(m.id, { precio_mn: Number(e.target.value) || 0 })
-                  }
-                />
-              </td>
-              <td className="px-4 py-1">
-                <input
-                  className="input border-0 px-1 py-1 text-right"
-                  type="number"
-                  step="any"
-                  defaultValue={m.precio_usd || ''}
-                  onBlur={(e) =>
-                    updateMaterialLine(m.id, { precio_usd: Number(e.target.value) || 0 })
-                  }
-                />
-              </td>
-              <td className="px-4 py-1">
+              </div>
+              <div>
+                <label className="label">Quién paga</label>
                 <select
-                  className="input border-0 px-1 py-1"
+                  className="input"
                   value={m.socio_comprador ?? ''}
                   onChange={(e) => updateMaterialLine(m.id, { socio_comprador: e.target.value })}
                 >
@@ -291,28 +268,121 @@ function TablaMateriales({
                     </option>
                   ))}
                 </select>
-              </td>
-              <td className="px-4 py-1 text-right">
-                {fmtMoney((m.cantidad || 0) * (m.precio_mn || 0), 'MN')}
-              </td>
-              <td className="px-4 py-1 text-right">
-                {fmtMoney((m.cantidad || 0) * (m.precio_usd || 0), 'USD')}
-              </td>
-              <td className="px-4 py-1 text-right">
-                <button
-                  className="text-red-500 hover:underline"
-                  onClick={() => {
-                    if (confirm('¿Eliminar este material del proyecto?')) deleteMaterialLine(m.id)
-                  }}
-                >
-                  ✕
-                </button>
-              </td>
+              </div>
+              <div>
+                <label className="label">Precio MN</label>
+                <input
+                  className="input"
+                  type="number"
+                  step="any"
+                  defaultValue={m.precio_mn || ''}
+                  onBlur={(e) => updateMaterialLine(m.id, { precio_mn: Number(e.target.value) || 0 })}
+                />
+              </div>
+              <div>
+                <label className="label">Precio USD</label>
+                <input
+                  className="input"
+                  type="number"
+                  step="any"
+                  defaultValue={m.precio_usd || ''}
+                  onBlur={(e) => updateMaterialLine(m.id, { precio_usd: Number(e.target.value) || 0 })}
+                />
+              </div>
+            </div>
+
+            <div className="mt-3 flex justify-between border-t border-slate-100 pt-2 text-sm">
+              <span className="text-slate-500">
+                Total MN <b className="text-slate-800">{fmtMoney((m.cantidad || 0) * (m.precio_mn || 0), 'MN')}</b>
+              </span>
+              <span className="text-slate-500">
+                Total USD <b className="text-slate-800">{fmtMoney((m.cantidad || 0) * (m.precio_usd || 0), 'USD')}</b>
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop: table */}
+      <div className="hidden overflow-x-auto sm:block">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-slate-100 text-left text-xs text-slate-500">
+              <th className="px-4 py-2">Material</th>
+              <th className="px-4 py-2 w-16 text-right">Cant</th>
+              <th className="px-4 py-2 w-24 text-right">Precio MN</th>
+              <th className="px-4 py-2 w-24 text-right">Precio USD</th>
+              <th className="px-4 py-2 w-32">Quién paga</th>
+              <th className="px-4 py-2 w-28 text-right">Total MN</th>
+              <th className="px-4 py-2 w-28 text-right">Total USD</th>
+              <th className="px-4 py-2"></th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {items.map((m) => (
+              <tr key={m.id} className="border-b border-slate-50">
+                <td className="px-4 py-1">
+                  <span className="font-medium">{m.descripcion}</span>{' '}
+                  <Badge tipo={m.material_id ? 'almacen' : 'proyecto'} />
+                </td>
+                <td className="px-4 py-1">
+                  <input
+                    className="input border-0 px-1 py-1 text-right"
+                    type="number"
+                    step="any"
+                    defaultValue={m.cantidad || ''}
+                    onBlur={(e) => updateMaterialLine(m.id, { cantidad: Number(e.target.value) || 0 })}
+                  />
+                </td>
+                <td className="px-4 py-1">
+                  <input
+                    className="input border-0 px-1 py-1 text-right"
+                    type="number"
+                    step="any"
+                    defaultValue={m.precio_mn || ''}
+                    onBlur={(e) => updateMaterialLine(m.id, { precio_mn: Number(e.target.value) || 0 })}
+                  />
+                </td>
+                <td className="px-4 py-1">
+                  <input
+                    className="input border-0 px-1 py-1 text-right"
+                    type="number"
+                    step="any"
+                    defaultValue={m.precio_usd || ''}
+                    onBlur={(e) => updateMaterialLine(m.id, { precio_usd: Number(e.target.value) || 0 })}
+                  />
+                </td>
+                <td className="px-4 py-1">
+                  <select
+                    className="input border-0 px-1 py-1"
+                    value={m.socio_comprador ?? ''}
+                    onChange={(e) => updateMaterialLine(m.id, { socio_comprador: e.target.value })}
+                  >
+                    <option value="">—</option>
+                    {socios.map((s) => (
+                      <option key={s.id} value={s.nombre}>
+                        {s.nombre}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+                <td className="px-4 py-1 text-right">
+                  {fmtMoney((m.cantidad || 0) * (m.precio_mn || 0), 'MN')}
+                </td>
+                <td className="px-4 py-1 text-right">
+                  {fmtMoney((m.cantidad || 0) * (m.precio_usd || 0), 'USD')}
+                </td>
+                <td className="px-4 py-1 text-right">
+                  <button className="text-red-500 hover:underline" onClick={() => eliminar(m.id)}>
+                    ✕
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   )
 }
 
@@ -333,31 +403,33 @@ function ListaMonto({
   return (
     <div className="divide-y divide-slate-50">
       {items.map((m) => (
-        <div key={m.id} className="flex items-center gap-2 px-4 py-2">
+        <div key={m.id} className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:gap-2 sm:py-2">
           <input
             className="input flex-1 border-0 px-1 py-1"
             value={m.descripcion}
             onChange={(e) => onDesc(m.id, e.target.value)}
           />
-          <input
-            className="input w-28 border-0 px-1 py-1 text-right"
-            type="number"
-            step="any"
-            defaultValue={m.monto_mn || ''}
-            placeholder="MN"
-            onBlur={(e) => onMn(m.id, Number(e.target.value) || 0)}
-          />
-          <input
-            className="input w-28 border-0 px-1 py-1 text-right"
-            type="number"
-            step="any"
-            defaultValue={m.monto_usd || ''}
-            placeholder="USD"
-            onBlur={(e) => onUsd(m.id, Number(e.target.value) || 0)}
-          />
-          <button className="text-red-500" onClick={() => onDel(m.id)}>
-            ✕
-          </button>
+          <div className="flex items-center gap-2">
+            <input
+              className="input w-full border-0 px-1 py-1 text-right sm:w-28"
+              type="number"
+              step="any"
+              defaultValue={m.monto_mn || ''}
+              placeholder="MN"
+              onBlur={(e) => onMn(m.id, Number(e.target.value) || 0)}
+            />
+            <input
+              className="input w-full border-0 px-1 py-1 text-right sm:w-28"
+              type="number"
+              step="any"
+              defaultValue={m.monto_usd || ''}
+              placeholder="USD"
+              onBlur={(e) => onUsd(m.id, Number(e.target.value) || 0)}
+            />
+            <button className="text-red-500" onClick={() => onDel(m.id)}>
+              ✕
+            </button>
+          </div>
         </div>
       ))}
     </div>

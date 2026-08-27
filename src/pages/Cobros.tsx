@@ -6,11 +6,11 @@ import { fmtMoney } from '../lib/format'
 import { Card, CardHeader, Empty } from '../components/ui'
 
 export default function Cobros() {
-  const proyectos = useLiveQuery(() => db.proyectos.filter(r => !r.deleted).toArray(), [])
-  const materiales = useLiveQuery(() => db.proyecto_materiales.filter(r => !r.deleted).toArray(), [])
-  const manoObra = useLiveQuery(() => db.mano_obra.filter(r => !r.deleted).toArray(), [])
-  const pagos = useLiveQuery(() => db.pagos.filter(r => !r.deleted).toArray(), [])
-  const gastos = useLiveQuery(() => db.gastos.filter(r => !r.deleted).toArray(), [])
+  const proyectos = useLiveQuery(() => db.proyectos.filter((r) => !r.deleted).toArray(), [])
+  const materiales = useLiveQuery(() => db.proyecto_materiales.filter((r) => !r.deleted).toArray(), [])
+  const manoObra = useLiveQuery(() => db.mano_obra.filter((r) => !r.deleted).toArray(), [])
+  const pagos = useLiveQuery(() => db.pagos.filter((r) => !r.deleted).toArray(), [])
+  const gastos = useLiveQuery(() => db.gastos.filter((r) => !r.deleted).toArray(), [])
   const clientes = useLiveQuery(() => db.clientes.toArray(), [])
 
   if (!proyectos || !materiales || !manoObra || !pagos || !gastos) {
@@ -48,61 +48,107 @@ export default function Cobros() {
         <p className="text-sm text-slate-500">Qué se ha pagado y qué queda por recobrar</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Card className="p-4">
           <div className="text-xs text-slate-500">Gastos totales</div>
-          <div className="text-lg font-bold">{fmtMoney(tot.gastos_mn, 'MN')} / {fmtMoney(tot.gastos_usd, 'USD')}</div>
+          <div className="text-lg font-bold">
+            {fmtMoney(tot.gastos_mn, 'MN')} / {fmtMoney(tot.gastos_usd, 'USD')}
+          </div>
         </Card>
         <Card className="p-4">
           <div className="text-xs text-slate-500">Pagado total</div>
-          <div className="text-lg font-bold text-emerald-600">{fmtMoney(tot.pagado_mn, 'MN')} / {fmtMoney(tot.pagado_usd, 'USD')}</div>
+          <div className="text-lg font-bold text-emerald-600">
+            {fmtMoney(tot.pagado_mn, 'MN')} / {fmtMoney(tot.pagado_usd, 'USD')}
+          </div>
         </Card>
         <Card className="p-4">
           <div className="text-xs text-slate-500">Queda por recobrar</div>
-          <div className="text-lg font-bold text-amber-600">{fmtMoney(tot.queda_mn, 'MN')} / {fmtMoney(tot.queda_usd, 'USD')}</div>
+          <div className="text-lg font-bold text-amber-600">
+            {fmtMoney(tot.queda_mn, 'MN')} / {fmtMoney(tot.queda_usd, 'USD')}
+          </div>
         </Card>
       </div>
 
-      <Card>
-        <CardHeader title="Libro de recuperación" />
-        {rows.length === 0 ? (
+      {rows.length === 0 ? (
+        <Card>
           <Empty text="Sin datos." />
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-100 text-left text-xs text-slate-500">
-                  <th className="px-4 py-2">Proyecto</th>
-                  <th className="px-4 py-2 text-right">Gastos MN</th>
-                  <th className="px-4 py-2 text-right">Gastos USD</th>
-                  <th className="px-4 py-2 text-right">Pagado MN</th>
-                  <th className="px-4 py-2 text-right">Pagado USD</th>
-                  <th className="px-4 py-2 text-right">Queda MN</th>
-                  <th className="px-4 py-2 text-right">Queda USD</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map(({ p, t }) => (
-                  <tr key={p.id} className="border-b border-slate-50 hover:bg-slate-50">
-                    <td className="px-4 py-2">
-                      <Link to={`/proyectos/${p.id}`} className="font-medium text-brand-600">
-                        {p.codigo}
-                      </Link>{' '}
-                      <span className="text-slate-500">{nombreCliente(p.cliente_id) || p.nombre}</span>
-                    </td>
-                    <td className="px-4 py-2 text-right">{fmtMoney(t.gastos_mn, 'MN')}</td>
-                    <td className="px-4 py-2 text-right">{fmtMoney(t.gastos_usd, 'USD')}</td>
-                    <td className="px-4 py-2 text-right">{fmtMoney(t.pagado_mn, 'MN')}</td>
-                    <td className="px-4 py-2 text-right">{fmtMoney(t.pagado_usd, 'USD')}</td>
-                    <td className="px-4 py-2 text-right font-medium text-amber-600">{fmtMoney(t.queda_mn, 'MN')}</td>
-                    <td className="px-4 py-2 text-right font-medium text-amber-600">{fmtMoney(t.queda_usd, 'USD')}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        </Card>
+      ) : (
+        <>
+          {/* Mobile: cards */}
+          <div className="space-y-3 sm:hidden">
+            {rows.map(({ p, t }) => (
+              <Card key={p.id} className="p-4">
+                <Link to={`/proyectos/${p.id}`} className="block">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-brand-600">{p.codigo}</span>
+                    <span className="text-sm text-slate-500">{nombreCliente(p.cliente_id) || p.nombre}</span>
+                  </div>
+                </Link>
+                <div className="mt-2 space-y-1 text-sm">
+                  <Fila label="Gastos" mn={t.gastos_mn} usd={t.gastos_usd} />
+                  <Fila label="Pagado" mn={t.pagado_mn} usd={t.pagado_usd} tone="green" />
+                  <Fila label="Queda" mn={t.queda_mn} usd={t.queda_usd} tone="amber" />
+                </div>
+              </Card>
+            ))}
           </div>
-        )}
-      </Card>
+
+          {/* Desktop: table */}
+          <Card>
+            <CardHeader title="Libro de recuperación" />
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-100 text-left text-xs text-slate-500">
+                    <th className="px-4 py-2">Proyecto</th>
+                    <th className="px-4 py-2 text-right">Gastos MN</th>
+                    <th className="px-4 py-2 text-right">Gastos USD</th>
+                    <th className="px-4 py-2 text-right">Pagado MN</th>
+                    <th className="px-4 py-2 text-right">Pagado USD</th>
+                    <th className="px-4 py-2 text-right">Queda MN</th>
+                    <th className="px-4 py-2 text-right">Queda USD</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map(({ p, t }) => (
+                    <tr key={p.id} className="border-b border-slate-50 hover:bg-slate-50">
+                      <td className="px-4 py-2">
+                        <Link to={`/proyectos/${p.id}`} className="font-medium text-brand-600">
+                          {p.codigo}
+                        </Link>{' '}
+                        <span className="text-slate-500">{nombreCliente(p.cliente_id) || p.nombre}</span>
+                      </td>
+                      <td className="px-4 py-2 text-right">{fmtMoney(t.gastos_mn, 'MN')}</td>
+                      <td className="px-4 py-2 text-right">{fmtMoney(t.gastos_usd, 'USD')}</td>
+                      <td className="px-4 py-2 text-right">{fmtMoney(t.pagado_mn, 'MN')}</td>
+                      <td className="px-4 py-2 text-right">{fmtMoney(t.pagado_usd, 'USD')}</td>
+                      <td className="px-4 py-2 text-right font-medium text-amber-600">{fmtMoney(t.queda_mn, 'MN')}</td>
+                      <td className="px-4 py-2 text-right font-medium text-amber-600">{fmtMoney(t.queda_usd, 'USD')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </>
+      )}
+    </div>
+  )
+}
+
+function Fila({ label, mn, usd, tone = 'default' }: { label: string; mn: number; usd: number; tone?: 'default' | 'green' | 'amber' }) {
+  const tones: Record<string, string> = {
+    default: 'text-slate-700',
+    green: 'text-emerald-600',
+    amber: 'text-amber-600',
+  }
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-slate-500">{label}</span>
+      <span className={`font-medium ${tones[tone]}`}>
+        {fmtMoney(mn, 'MN')} / {fmtMoney(usd, 'USD')}
+      </span>
     </div>
   )
 }

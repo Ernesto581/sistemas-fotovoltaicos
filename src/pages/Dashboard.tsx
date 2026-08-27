@@ -6,14 +6,14 @@ import { fmtMoney, fmtNum } from '../lib/format'
 import { Stat, Card, CardHeader, Empty } from '../components/ui'
 
 export default function Dashboard() {
-  const proyectos = useLiveQuery(() => db.proyectos.filter(r => !r.deleted).toArray(), [])
+  const proyectos = useLiveQuery(() => db.proyectos.filter((r) => !r.deleted).toArray(), [])
   const materiales = useLiveQuery(
-    () => db.proyecto_materiales.filter(r => !r.deleted).toArray(),
+    () => db.proyecto_materiales.filter((r) => !r.deleted).toArray(),
     [],
   )
-  const manoObra = useLiveQuery(() => db.mano_obra.filter(r => !r.deleted).toArray(), [])
-  const pagos = useLiveQuery(() => db.pagos.filter(r => !r.deleted).toArray(), [])
-  const gastos = useLiveQuery(() => db.gastos.filter(r => !r.deleted).toArray(), [])
+  const manoObra = useLiveQuery(() => db.mano_obra.filter((r) => !r.deleted).toArray(), [])
+  const pagos = useLiveQuery(() => db.pagos.filter((r) => !r.deleted).toArray(), [])
+  const gastos = useLiveQuery(() => db.gastos.filter((r) => !r.deleted).toArray(), [])
   const clientes = useLiveQuery(() => db.clientes.toArray(), [])
 
   if (!proyectos || !materiales || !manoObra || !pagos || !gastos) {
@@ -61,44 +61,81 @@ export default function Dashboard() {
           }
         />
         {rows.length === 0 ? (
-          <Empty text="No hay proyectos todavía. Importa el Excel o crea uno nuevo." />
+          <Empty text="No hay proyectos todavía." />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-100 text-left text-xs text-slate-500">
-                  <th className="px-4 py-2">Código</th>
-                  <th className="px-4 py-2">Cliente</th>
-                  <th className="px-4 py-2 text-right">Total MN</th>
-                  <th className="px-4 py-2 text-right">Total USD</th>
-                  <th className="px-4 py-2 text-right">Pagado</th>
-                  <th className="px-4 py-2 text-right">Queda MN</th>
-                  <th className="px-4 py-2 text-right">Queda USD</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map(({ p, t }) => (
-                  <tr key={p.id} className="border-b border-slate-50 hover:bg-slate-50">
-                    <td className="px-4 py-2 font-medium text-brand-600">
-                      <Link to={`/proyectos/${p.id}`}>{p.codigo}</Link>
-                    </td>
-                    <td className="px-4 py-2">{clienteNombre(p.cliente_id) || p.nombre}</td>
-                    <td className="px-4 py-2 text-right">{fmtMoney(t.total_mn, 'MN')}</td>
-                    <td className="px-4 py-2 text-right">{fmtMoney(t.total_usd, 'USD')}</td>
-                    <td className="px-4 py-2 text-right text-slate-500">
-                      {fmtMoney(t.pagado_mn, 'MN')} / {fmtMoney(t.pagado_usd, 'USD')}
-                    </td>
-                    <td className={`px-4 py-2 text-right font-medium ${t.queda_mn > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
-                      {fmtMoney(t.queda_mn, 'MN')}
-                    </td>
-                    <td className={`px-4 py-2 text-right font-medium ${t.queda_usd > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
-                      {fmtMoney(t.queda_usd, 'USD')}
-                    </td>
+          <>
+            {/* Mobile: cards */}
+            <div className="divide-y divide-slate-100 sm:hidden">
+              {rows.map(({ p, t }) => (
+                <Link key={p.id} to={`/proyectos/${p.id}`} className="block px-4 py-3 active:bg-slate-50">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-brand-600">{p.codigo}</span>
+                    <span className="text-sm text-slate-500">{clienteNombre(p.cliente_id) || p.nombre}</span>
+                  </div>
+                  <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Total MN</span>
+                      <span className="font-medium">{fmtMoney(t.total_mn, 'MN')}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Total USD</span>
+                      <span className="font-medium">{fmtMoney(t.total_usd, 'USD')}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Queda MN</span>
+                      <span className={`font-semibold ${t.queda_mn > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                        {fmtMoney(t.queda_mn, 'MN')}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Queda USD</span>
+                      <span className={`font-semibold ${t.queda_usd > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                        {fmtMoney(t.queda_usd, 'USD')}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            {/* Desktop: table */}
+            <div className="hidden overflow-x-auto sm:block">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-100 text-left text-xs text-slate-500">
+                    <th className="px-4 py-2">Código</th>
+                    <th className="px-4 py-2">Cliente</th>
+                    <th className="px-4 py-2 text-right">Total MN</th>
+                    <th className="px-4 py-2 text-right">Total USD</th>
+                    <th className="px-4 py-2 text-right">Pagado</th>
+                    <th className="px-4 py-2 text-right">Queda MN</th>
+                    <th className="px-4 py-2 text-right">Queda USD</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {rows.map(({ p, t }) => (
+                    <tr key={p.id} className="border-b border-slate-50 hover:bg-slate-50">
+                      <td className="px-4 py-2 font-medium text-brand-600">
+                        <Link to={`/proyectos/${p.id}`}>{p.codigo}</Link>
+                      </td>
+                      <td className="px-4 py-2">{clienteNombre(p.cliente_id) || p.nombre}</td>
+                      <td className="px-4 py-2 text-right">{fmtMoney(t.total_mn, 'MN')}</td>
+                      <td className="px-4 py-2 text-right">{fmtMoney(t.total_usd, 'USD')}</td>
+                      <td className="px-4 py-2 text-right text-slate-500">
+                        {fmtMoney(t.pagado_mn, 'MN')} / {fmtMoney(t.pagado_usd, 'USD')}
+                      </td>
+                      <td className={`px-4 py-2 text-right font-medium ${t.queda_mn > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                        {fmtMoney(t.queda_mn, 'MN')}
+                      </td>
+                      <td className={`px-4 py-2 text-right font-medium ${t.queda_usd > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                        {fmtMoney(t.queda_usd, 'USD')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </Card>
     </div>

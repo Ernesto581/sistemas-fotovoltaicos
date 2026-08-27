@@ -95,7 +95,7 @@ export default function Cobros() {
           </div>
 
           {/* Desktop: table */}
-          <Card>
+          <Card className="hidden sm:block">
             <CardHeader title="Libro de recuperación" />
             <div className="overflow-x-auto">
               <table className="w-full text-sm">

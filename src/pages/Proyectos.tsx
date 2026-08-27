@@ -67,7 +67,7 @@ export default function Proyectos() {
           </div>
 
           {/* Desktop: table */}
-          <Card>
+          <Card className="hidden sm:block">
             <CardHeader title="Lista de proyectos" />
             <div className="overflow-x-auto">
               <table className="w-full text-sm">

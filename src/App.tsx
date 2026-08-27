@@ -9,7 +9,6 @@ import Proyectos from './pages/Proyectos'
 import ProyectoNuevo from './pages/ProyectoNuevo'
 import ProyectoDetalle from './pages/ProyectoDetalle'
 import Cobros from './pages/Cobros'
-import Reportes from './pages/Reportes'
 
 function RequireAuth({ children }: { children: JSX.Element }) {
   const { session, loading } = useAuth()
@@ -43,7 +42,6 @@ export default function App() {
         <Route path="proyectos/nuevo" element={<ProyectoNuevo />} />
         <Route path="proyectos/:id" element={<ProyectoDetalle />} />
         <Route path="cobros" element={<Cobros />} />
-        <Route path="reportes" element={<Reportes />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

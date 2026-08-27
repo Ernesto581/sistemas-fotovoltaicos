@@ -6,7 +6,6 @@ const nav = [
   { to: '/materiales', label: 'Almacén', icon: '▤' },
   { to: '/proyectos', label: 'Proyectos', icon: '⚡' },
   { to: '/cobros', label: 'Cobros', icon: '$' },
-  { to: '/reportes', label: 'Reportes', icon: '∑' },
 ]
 
 export function Layout() {

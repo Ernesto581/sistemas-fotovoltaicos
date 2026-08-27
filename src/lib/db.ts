@@ -1,6 +1,5 @@
 import Dexie, { type Table } from 'dexie'
 import type {
-  Socio,
   Cliente,
   Material,
   MaterialAlias,
@@ -13,7 +12,6 @@ import type {
 } from '../types'
 
 export class AppDB extends Dexie {
-  socios!: Table<Socio, string>
   clientes!: Table<Cliente, string>
   materiales!: Table<Material, string>
   material_alias!: Table<MaterialAlias, string>
@@ -62,13 +60,23 @@ export class AppDB extends Dexie {
       gastos: 'id, proyecto_id, updated_at',
       outbox: '++id, table, row_id',
     })
+    this.version(4).stores({
+      clientes: 'id, nombre, updated_at',
+      materiales: 'id, nombre, updated_at',
+      material_alias: 'id, material_id, alias, updated_at',
+      proyectos: 'id, codigo, cliente_id, updated_at',
+      proyecto_materiales: 'id, proyecto_id, material_id, updated_at',
+      mano_obra: 'id, proyecto_id, updated_at',
+      pagos: 'id, proyecto_id, updated_at',
+      gastos: 'id, proyecto_id, updated_at',
+      outbox: '++id, table, row_id',
+    })
   }
 }
 
 export const db = new AppDB()
 
 export const TABLE_NAMES = [
-  'socios',
   'clientes',
   'materiales',
   'material_alias',

@@ -17,7 +17,6 @@ export async function addMaterialLine(
     cantidad: number
     precio_mn: number
     precio_usd: number
-    socio_comprador?: string
   },
 ) {
   const id = await createRow('proyecto_materiales', { proyecto_id: proyectoId, ...data })

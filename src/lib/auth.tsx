@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase, isSupabaseConfigured } from './supabase'
-import { seedDefaultSocios, syncNow, isOnline } from './sync'
+import { syncNow, isOnline } from './sync'
 
 interface AuthState {
   session: Session | null
@@ -55,9 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!session) return
-    seedDefaultSocios().then(() => {
-      if (navigator.onLine) syncNow()
-    })
+    if (navigator.onLine) syncNow()
   }, [session])
 
   useEffect(() => {

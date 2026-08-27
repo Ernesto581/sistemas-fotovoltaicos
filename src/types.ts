@@ -1,13 +1,3 @@
-export type SocioId = string
-
-export interface Socio {
-  id: string
-  nombre: string
-  created_at: string
-  updated_at: string
-  deleted: boolean
-}
-
 export interface Cliente {
   id: string
   nombre: string
@@ -64,7 +54,6 @@ export interface ProyectoMaterial {
   usado?: number
   precio_mn: number
   precio_usd: number
-  socio_comprador?: string
   created_at: string
   updated_at: string
   deleted: boolean
@@ -88,7 +77,6 @@ export interface Pago {
   monto_mn: number
   monto_usd: number
   concepto: string
-  socio?: string
   created_at: string
   updated_at: string
   deleted: boolean
@@ -101,7 +89,6 @@ export interface Gasto {
   descripcion: string
   monto_mn: number
   monto_usd: number
-  socio?: string
   created_at: string
   updated_at: string
   deleted: boolean

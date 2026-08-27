@@ -6,19 +6,17 @@ import type { Material } from '../types'
 interface Props {
   proyectoId: string
   catalogo: Material[]
-  socios: { id: string; nombre: string }[]
   onDone: () => void
   onCancel: () => void
 }
 
-export function MaterialLineForm({ proyectoId, catalogo, socios, onDone, onCancel }: Props) {
+export function MaterialLineForm({ proyectoId, catalogo, onDone, onCancel }: Props) {
   const [modo, setModo] = useState<'almacen' | 'nuevo'>('almacen')
   const [materialId, setMaterialId] = useState('')
   const [nombre, setNombre] = useState('')
   const [cantidad, setCantidad] = useState('')
   const [precioMn, setPrecioMn] = useState('')
   const [precioUsd, setPrecioUsd] = useState('')
-  const [socio, setSocio] = useState('')
   const [busy, setBusy] = useState(false)
 
   const selected = useMemo(() => catalogo.find((m) => m.id === materialId), [materialId, catalogo])
@@ -46,7 +44,6 @@ export function MaterialLineForm({ proyectoId, catalogo, socios, onDone, onCance
         cantidad: cant,
         precio_mn: Number(precioMn) || 0,
         precio_usd: Number(precioUsd) || 0,
-        socio_comprador: socio || undefined,
       })
       onDone()
     } finally {
@@ -137,17 +134,6 @@ export function MaterialLineForm({ proyectoId, catalogo, socios, onDone, onCance
             value={precioUsd}
             onChange={(e) => setPrecioUsd(e.target.value)}
           />
-        </div>
-        <div>
-          <label className="label">Quién paga</label>
-          <select className="input" value={socio} onChange={(e) => setSocio(e.target.value)}>
-            <option value="">—</option>
-            {socios.map((s) => (
-              <option key={s.id} value={s.nombre}>
-                {s.nombre}
-              </option>
-            ))}
-          </select>
         </div>
       </div>
 

@@ -95,17 +95,3 @@ export async function syncNow(): Promise<void> {
   await pushOutbox()
   await pullChanges()
 }
-
-export async function seedDefaultSocios(): Promise<void> {
-  const socios = [
-    { id: '00000000-0000-0000-0000-000000000001', nombre: 'Raulin' },
-    { id: '00000000-0000-0000-0000-000000000002', nombre: 'Avilio' },
-  ]
-  for (const s of socios) {
-    const existe = await db.socios.get(s.id)
-    if (existe) continue
-    const now = nowIso()
-    await db.socios.put({ id: s.id, nombre: s.nombre, created_at: now, updated_at: now, deleted: false })
-    await enqueue('socios', s.id)
-  }
-}

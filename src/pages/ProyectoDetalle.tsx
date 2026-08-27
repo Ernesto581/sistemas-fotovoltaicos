@@ -16,7 +16,6 @@ export default function ProyectoDetalle() {
   const { id } = useParams<{ id: string }>()
   const proyecto = useLiveQuery(() => db.proyectos.get(id!), [id])
   const clientes = useLiveQuery(() => db.clientes.toArray(), [])
-  const socios = useLiveQuery(() => db.socios.toArray(), [])
   const catalogo = useLiveQuery(() => db.materiales.filter(r => !r.deleted).toArray(), [])
   const materiales = useLiveQuery(
     () => db.proyecto_materiales.where('proyecto_id').equals(id!).toArray(),
@@ -127,7 +126,6 @@ export default function ProyectoDetalle() {
             <MaterialLineForm
               proyectoId={id!}
               catalogo={catalogo ?? []}
-              socios={socios ?? []}
               onDone={() => setAgregandoMaterial(false)}
               onCancel={() => setAgregandoMaterial(false)}
             />
@@ -136,7 +134,7 @@ export default function ProyectoDetalle() {
         {!materiales || materiales.length === 0 ? (
           <Empty text="Sin materiales. Agrega el primero." />
         ) : (
-          <TablaMateriales items={materiales} socios={socios ?? []} />
+          <TablaMateriales items={materiales} />
         )}
       </Card>
 
@@ -216,13 +214,7 @@ function Badge({ tipo }: { tipo: 'almacen' | 'proyecto' }) {
   )
 }
 
-function TablaMateriales({
-  items,
-  socios,
-}: {
-  items: ProyectoMaterial[]
-  socios: { id: string; nombre: string }[]
-}) {
+function TablaMateriales({ items }: { items: ProyectoMaterial[] }) {
   const eliminar = (id: string) => {
     if (confirm('¿Eliminar este material del proyecto?')) deleteMaterialLine(id)
   }
@@ -253,21 +245,6 @@ function TablaMateriales({
                   defaultValue={m.cantidad || ''}
                   onBlur={(e) => updateMaterialLine(m.id, { cantidad: Number(e.target.value) || 0 })}
                 />
-              </div>
-              <div>
-                <label className="label">Quién paga</label>
-                <select
-                  className="input"
-                  value={m.socio_comprador ?? ''}
-                  onChange={(e) => updateMaterialLine(m.id, { socio_comprador: e.target.value })}
-                >
-                  <option value="">—</option>
-                  {socios.map((s) => (
-                    <option key={s.id} value={s.nombre}>
-                      {s.nombre}
-                    </option>
-                  ))}
-                </select>
               </div>
               <div>
                 <label className="label">Precio MN</label>
@@ -312,7 +289,6 @@ function TablaMateriales({
               <th className="px-4 py-2 w-16 text-right">Cant</th>
               <th className="px-4 py-2 w-24 text-right">Precio MN</th>
               <th className="px-4 py-2 w-24 text-right">Precio USD</th>
-              <th className="px-4 py-2 w-32">Quién paga</th>
               <th className="px-4 py-2 w-28 text-right">Total MN</th>
               <th className="px-4 py-2 w-28 text-right">Total USD</th>
               <th className="px-4 py-2"></th>
@@ -351,20 +327,6 @@ function TablaMateriales({
                     defaultValue={m.precio_usd || ''}
                     onBlur={(e) => updateMaterialLine(m.id, { precio_usd: Number(e.target.value) || 0 })}
                   />
-                </td>
-                <td className="px-4 py-1">
-                  <select
-                    className="input border-0 px-1 py-1"
-                    value={m.socio_comprador ?? ''}
-                    onChange={(e) => updateMaterialLine(m.id, { socio_comprador: e.target.value })}
-                  >
-                    <option value="">—</option>
-                    {socios.map((s) => (
-                      <option key={s.id} value={s.nombre}>
-                        {s.nombre}
-                      </option>
-                    ))}
-                  </select>
                 </td>
                 <td className="px-4 py-1 text-right">
                   {fmtMoney((m.cantidad || 0) * (m.precio_mn || 0), 'MN')}

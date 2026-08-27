@@ -42,22 +42,30 @@ export default function Proyectos() {
               <Card key={p.id} className="p-4">
                 <Link to={`/proyectos/${p.id}`} className="block">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-brand-600">{p.codigo}</span>
+                    <div>
+                      <div className="text-xs text-slate-400">Código</div>
+                      <div className="font-semibold text-brand-600">{p.codigo}</div>
+                    </div>
                     <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
                       {p.estado}
                     </span>
                   </div>
-                  <div className="mt-1 text-sm text-slate-500">{nombreCliente(p.cliente_id) || p.nombre}</div>
-                  <div className="mt-2 flex gap-4 text-sm">
-                    <span className="text-slate-500">
-                      {fmtNum(p.watts)} kW
-                    </span>
-                    <span className="text-slate-500">
-                      ${fmtNum(p.tarifa_mo)}/kW
-                    </span>
+                  <div className="mt-3 space-y-1.5 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Cliente</span>
+                      <span className="font-medium text-slate-800">{nombreCliente(p.cliente_id) || p.nombre}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Potencia</span>
+                      <span className="font-medium text-slate-800">{fmtNum(p.watts)} kW</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Tarifa</span>
+                      <span className="font-medium text-slate-800">${fmtNum(p.tarifa_mo)}/kW</span>
+                    </div>
                   </div>
                 </Link>
-                <div className="mt-2 flex justify-end">
+                <div className="mt-3 flex justify-end border-t border-slate-100 pt-2">
                   <button className="text-sm text-red-500" onClick={() => borrar(p)}>
                     Borrar
                   </button>

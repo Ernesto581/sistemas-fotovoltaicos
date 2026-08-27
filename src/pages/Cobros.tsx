@@ -81,8 +81,14 @@ export default function Cobros() {
               <Card key={p.id} className="p-4">
                 <Link to={`/proyectos/${p.id}`} className="block">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-brand-600">{p.codigo}</span>
-                    <span className="text-sm text-slate-500">{nombreCliente(p.cliente_id) || p.nombre}</span>
+                    <div>
+                      <div className="text-xs text-slate-400">Código</div>
+                      <div className="font-semibold text-brand-600">{p.codigo}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs text-slate-400">Cliente</div>
+                      <div className="text-sm text-slate-700">{nombreCliente(p.cliente_id) || p.nombre}</div>
+                    </div>
                   </div>
                 </Link>
                 <div className="mt-2 space-y-1 text-sm">

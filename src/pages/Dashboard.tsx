@@ -69,8 +69,14 @@ export default function Dashboard() {
               {rows.map(({ p, t }) => (
                 <Link key={p.id} to={`/proyectos/${p.id}`} className="block px-4 py-3 active:bg-slate-50">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-brand-600">{p.codigo}</span>
-                    <span className="text-sm text-slate-500">{clienteNombre(p.cliente_id) || p.nombre}</span>
+                    <div>
+                      <div className="text-xs text-slate-400">Código</div>
+                      <div className="font-semibold text-brand-600">{p.codigo}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs text-slate-400">Cliente</div>
+                      <div className="text-sm text-slate-700">{clienteNombre(p.cliente_id) || p.nombre}</div>
+                    </div>
                   </div>
                   <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
                     <div className="flex justify-between">

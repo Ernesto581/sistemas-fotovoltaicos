@@ -362,38 +362,48 @@ function ListaMonto({
   onDel: (id: string) => void
 }) {
   if (items.length === 0) return <Empty text="Vacío" />
+  const totalMn = items.reduce((a, m) => a + (m.monto_mn || 0), 0)
+  const totalUsd = items.reduce((a, m) => a + (m.monto_usd || 0), 0)
   return (
-    <div className="divide-y divide-slate-50">
-      {items.map((m) => (
-        <div key={m.id} className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:gap-2 sm:py-2">
-          <input
-            className="input flex-1 border-0 px-1 py-1"
-            value={m.descripcion}
-            onChange={(e) => onDesc(m.id, e.target.value)}
-          />
-          <div className="flex items-center gap-2">
+    <div>
+      <div className="divide-y divide-slate-50">
+        {items.map((m) => (
+          <div key={m.id} className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:gap-2 sm:py-2">
             <input
-              className="input w-full border-0 px-1 py-1 text-right sm:w-28"
-              type="number"
-              step="any"
-              defaultValue={m.monto_mn || ''}
-              placeholder="MN"
-              onBlur={(e) => onMn(m.id, Number(e.target.value) || 0)}
+              className="input flex-1 border-0 px-1 py-1"
+              value={m.descripcion}
+              onChange={(e) => onDesc(m.id, e.target.value)}
             />
-            <input
-              className="input w-full border-0 px-1 py-1 text-right sm:w-28"
-              type="number"
-              step="any"
-              defaultValue={m.monto_usd || ''}
-              placeholder="USD"
-              onBlur={(e) => onUsd(m.id, Number(e.target.value) || 0)}
-            />
-            <button className="text-red-500" onClick={() => onDel(m.id)}>
-              ✕
-            </button>
+            <div className="flex items-center gap-2">
+              <input
+                className="input w-full border-0 px-1 py-1 text-right sm:w-28"
+                type="number"
+                step="any"
+                defaultValue={m.monto_mn || ''}
+                placeholder="MN"
+                onBlur={(e) => onMn(m.id, Number(e.target.value) || 0)}
+              />
+              <input
+                className="input w-full border-0 px-1 py-1 text-right sm:w-28"
+                type="number"
+                step="any"
+                defaultValue={m.monto_usd || ''}
+                placeholder="USD"
+                onBlur={(e) => onUsd(m.id, Number(e.target.value) || 0)}
+              />
+              <button className="text-red-500" onClick={() => onDel(m.id)}>
+                ✕
+              </button>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
+      <div className="flex items-center justify-between border-t border-slate-200 px-4 py-2 text-sm">
+        <span className="font-medium text-slate-500">Total</span>
+        <span className="font-semibold text-slate-800">
+          {fmtMoney(totalMn, 'MN')} / {fmtMoney(totalUsd, 'USD')}
+        </span>
+      </div>
     </div>
   )
 }
